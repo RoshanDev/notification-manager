@@ -3,12 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog"
 	iamv1beta1 "kubesphere.io/api/iam/v1beta1"
 	"kubesphere.io/client-go/rest"
+)
+
+const (
+	defaultKubeSphereTokenFile = "/var/run/secrets/kubesphere.io/serviceaccount/token"
+	defaultKubernetesTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 )
 
 type Backend struct {
@@ -29,9 +35,13 @@ func NewBackend(host, username, password string, interval time.Duration, batchSi
 			Password: password,
 		}
 	} else {
+		tokenFile := defaultKubeSphereTokenFile
+		if _, err := os.Stat(tokenFile); os.IsNotExist(err) {
+			tokenFile = defaultKubernetesTokenFile
+		}
 		config = &rest.Config{
 			Host:            host,
-			BearerTokenFile: "/var/run/secrets/kubesphere.io/serviceaccount/token",
+			BearerTokenFile: tokenFile,
 		}
 	}
 

@@ -38,8 +38,32 @@ spec:
   {{- else }}
       image: {{ include "global.imageRegistry" . }}{{ .Values.notificationmanager.sidecar.image.repo }}:{{ .Values.kubesphere.version }}
   {{- end }}
+      imagePullPolicy: {{ .Values.notificationmanager.sidecar.image.pullPolicy }}
       name: tenant
       type: kubesphere
+  {{- if .Values.kubesphere.auth.secretName }}
+      env:
+        - name: KUBESPHERE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.kubesphere.auth.secretName }}
+              key: {{ .Values.kubesphere.auth.usernameKey }}
+        - name: KUBESPHERE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.kubesphere.auth.secretName }}
+              key: {{ .Values.kubesphere.auth.passwordKey }}
+  {{- end }}
+  {{- if or .Values.kubesphere.auth.secretName .Values.kubesphere.auth.host }}
+      args:
+  {{- if .Values.kubesphere.auth.secretName }}
+        - --username=$(KUBESPHERE_USERNAME)
+        - --password=$(KUBESPHERE_PASSWORD)
+  {{- end }}
+  {{- if .Values.kubesphere.auth.host }}
+        - --host={{ .Values.kubesphere.auth.host }}
+  {{- end }}
+  {{- end }}
   {{- end }}
   template:
     {{- toYaml .Values.notificationmanager.template | nindent 4 }}
