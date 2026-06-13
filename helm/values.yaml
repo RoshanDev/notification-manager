@@ -2,8 +2,8 @@ namespaceOverride: ""
 
 kubesphere:
   enabled: false
-  # supported version: v3.1.0, v3.2.0
-  version: v3.2.0
+  # supported version: v3.1.0, v3.2.0, v4.2.0
+  version: v4.2.0
 
 global:
   imageRegistry: ""
